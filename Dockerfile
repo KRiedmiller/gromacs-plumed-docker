@@ -38,9 +38,8 @@ ARG PLUMED_VERSION=uvt_extensions
 RUN apt-get update
 RUN apt-get install -y git
 
-# interim, before our changes are pushed to mainstream
 ENV GIT_SSL_NO_VERIFY=true
-RUN git clone https://github.com/kurecka/plumed2.git plumed2 --branch ${PLUMED_VERSION} --single-branch
+RUN git clone https://github.com/plumed/plumed2.git plumed2 --branch ${PLUMED_VERSION} --single-branch
 
 RUN cd /build && \
     curl https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.12.1%2Bcpu.zip --output torch.zip && \
