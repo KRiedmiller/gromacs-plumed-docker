@@ -1,10 +1,9 @@
 FROM nvidia/cuda:11.0.3-devel-ubuntu20.04 as builder
-MAINTAINER Ales Krenek <ljocha@ics.muni.cz> 
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Europe/Prague
+ENV TZ=Europe/Berlin
 
-ARG JOBS=8
+ARG JOBS=6
 
 #ARG FFTW_VERSION=3.3.9
 #ARG FFTW_MD5=50145bb68a8510b5d77605f11cadf8dc
@@ -87,6 +86,7 @@ RUN pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
 FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04
 
 RUN apt update
+RUN apt upgrade -y
 RUN apt install -y mpich
 RUN apt install -y libcufft10 libmpich12 libblas3 libgomp1 
 RUN apt install -y rsync
@@ -107,6 +107,41 @@ COPY gmx /usr/local/bin
 RUN ln -s gmx /usr/local/bin/gmx_d
 RUN ln -s gmx /usr/local/bin/mdrun
 RUN ln -s gmx /usr/local/bin/mdrun_d
+
+RUN apt-get install -y wget build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+
+RUN cd /usr/src && \
+    wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz && \
+    tar xzf Python-3.10.12.tgz && \
+    cd Python-3.10.12 && \
+    ./configure --enable-optimizations && \
+    make install
+RUN rm -r /usr/src/Python-3.10.12.tgz
+
+RUN cd /usr/src && \
+    wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
+    tar xzf Python-3.11.4.tgz && \
+    cd Python-3.11.4 && \
+    ./configure --enable-optimizations && \
+    make install
+RUN rm -r /usr/src/Python-3.11.4.tgz
+
+RUN cd /usr/src && \
+    wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz && \
+    tar xzf Python-3.9.17.tgz && \
+    cd Python-3.9.17 && \
+    ./configure --enable-optimizations && \
+    make install
+RUN rm -r /usr/src/Python-3.9.17.tgz
+
+RUN mkdir /venv
+RUN cd /venv
+RUN python3.9 -m pip install -U tox pip
+RUN python3.10 -m pip install -U tox pip
+RUN python3.11 -m pip install -U tox pip
+
+RUN apt install -y nodejs
+RUN apt install -y zip
 
 RUN apt clean
 RUN ldconfig

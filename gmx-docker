@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=kurecka/gromacs:2022-libtorch-1.12.1
+IMAGE=riedmiki/gromacs:2021
 
 GMX_DOUBLE="OFF"
 WORKDIR_CURRENT=""
