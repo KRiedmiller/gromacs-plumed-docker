@@ -5,13 +5,6 @@ ENV TZ=Europe/Berlin
 
 ARG JOBS=6
 
-#ARG FFTW_VERSION=3.3.9
-#ARG FFTW_MD5=50145bb68a8510b5d77605f11cadf8dc
-
-
-#enable contributed packages
-#RUN sed -i 's/main/main contrib/g' /etc/apt/sources.list
-
 RUN cat /etc/apt/sources.list
 #install dependencies
 RUN apt-get update 
@@ -20,20 +13,12 @@ RUN apt-get install -y libblas-dev xxd
 RUN apt-get install -y mpich libmpich-dev 
 RUN apt-get install -y curl
 RUN apt-get install -y unzip
-# RUN apt-get install -y libfftw3-dev
 
 RUN mkdir /build
 WORKDIR /build
 
-#RUN curl -o fftw.tar.gz http://www.fftw.org/fftw-${FFTW_VERSION}.tar.gz 
-#RUN echo ${FFTW_MD5} fftw.tar.gz > fftw.tar.gz.md5 && md5sum -c fftw.tar.gz.md5
-#
-#RUN tar -xzvf fftw.tar.gz && cd fftw-${FFTW_VERSION} \
-#  && ./configure --disable-double --enable-float --enable-sse2 --enable-avx --enable-avx2 --enable-avx512 --enable-shared --disable-static \
-#  && make -j ${JOBS} \
-#  && make install
 
-ARG PLUMED_VERSION=uvt_extensions
+ARG PLUMED_VERSION=master
 
 RUN apt-get update
 RUN apt-get install -y git
@@ -41,18 +26,19 @@ RUN apt-get install -y git
 ENV GIT_SSL_NO_VERIFY=true
 RUN git clone https://github.com/plumed/plumed2.git plumed2 --branch ${PLUMED_VERSION} --single-branch
 
-RUN cd /build && \
-    curl https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.12.1%2Bcpu.zip --output torch.zip && \
-    unzip torch.zip && \
-    rm torch.zip
+# RUN cd /build && \
+#     curl https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.12.1%2Bcpu.zip --output torch.zip && \
+#     unzip torch.zip && \
+#     rm torch.zip
 
-ENV LIBTORCH=/build/libtorch
-ENV CPATH=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$CPATH
-ENV INCLUDE=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$INCLUDE
-ENV LIBRARY_PATH=${LIBTORCH}/lib:$LIBRARY_PATH
-ENV LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH
+# ENV LIBTORCH=/build/libtorch
+# ENV CPATH=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$CPATH
+# ENV INCLUDE=${LIBTORCH}/include/torch/csrc/api/include/:${LIBTORCH}/include/:${LIBTORCH}/include/torch:$INCLUDE
+# ENV LIBRARY_PATH=${LIBTORCH}/lib:$LIBRARY_PATH
+# ENV LD_LIBRARY_PATH=${LIBTORCH}/lib:$LD_LIBRARY_PATH
+# RUN cd plumed2 && ./configure --enable-libtorch --enable-modules=all && make -j ${JOBS} && make install 
 
-RUN cd plumed2 && ./configure --enable-libtorch --enable-modules=all --enable-debug && make -j ${JOBS} && make install 
+RUN cd plumed2 && ./configure --enable-modules=reset && make -j ${JOBS} && make install 
 RUN ldconfig
 
 RUN apt update
@@ -90,11 +76,11 @@ RUN apt install -y mpich
 RUN apt install -y libcufft10 libmpich12 libblas3 libgomp1 
 RUN apt install -y rsync
 
-COPY --from=builder /build/libtorch /build/libtorch
-ENV LD_LIBRARY_PATH=/build/libtorch/lib:$LD_LIBRARY_PATH
-ENV CPLUS_INCLUDE_PATH=/build/libtorch/include:$CPLUS_INCLUDE_PATH
+# COPY --from=builder /build/libtorch /build/libtorch
+# ENV LD_LIBRARY_PATH=/build/libtorch/lib:$LD_LIBRARY_PATH
+# ENV CPLUS_INCLUDE_PATH=/build/libtorch/include:$CPLUS_INCLUDE_PATH
 
-COPY --from=builder /build/libtorch/lib/* /usr/local/lib/
+# COPY --from=builder /build/libtorch/lib/* /usr/local/lib/
 COPY --from=builder /usr/local/bin /usr/local/bin
 COPY --from=builder /usr/local/lib/libplumed* /usr/local/lib/
 COPY --from=builder /usr/local/lib/plumed/ /usr/local/lib/plumed/

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-IMAGE=riedmiki/gromacs:2021
+IMAGE=riedmiki/gromacs-plumed-python:2021
 
 GMX_DOUBLE="OFF"
 WORKDIR_CURRENT=""
