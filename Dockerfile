@@ -65,8 +65,8 @@ RUN ./build-gmx.sh -s gromacs-${GROMACS_VERSION} -j ${JOBS} -a AVX_512 -r
 RUN ./build-gmx.sh -s gromacs-${GROMACS_VERSION} -j ${JOBS} -a AVX_512 -r -d
 
 
-RUN apt-get install -y python3 python3-pip
-RUN pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
+# RUN apt-get install -y python3 python3-pip
+# RUN pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
 
 FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04
 
