@@ -35,7 +35,27 @@ Typical usage
 	docker run --gpus all -u $(id -u) -w /work -v $PWD:/work riedmiki/gromacs-plumed-python:2021 gmx ....
 
 or use gmx_d for double precision (does not support GPU). The current working directory is visible to Gromacs due to the -w and -v options, all GPUs are available.
-Effective UID is preserved with -u. 
+Effective UID is preserved with -u.  
+Alternatively, run `gmx-docker`, see help `gmx-docker -h`
+
+```
+usage: ./gmx-docker options [--] gromacs_args ...
+
+options are:
+        -n              MPI processes
+        -d              double precision
+        -a arch         enforce specific CPU architecture (SSE2, AVX2_256, AVX_512)
+        -r              enforce RDTSCP (should be detected)
+        -w              select working directory relative to shared one for current enumeration
+        -R              disable RDTSCP
+        -c              cleanup -- just remove docker image 
+        -p              use podman instead of docker
+        -i              specify char input for gromacs
+        -m              specify string input for gromacs
+        -v version      use specific docker image version (riedmiki/gromacs-plumed-python:2021 by default)
+```
+
+Both might require `sudo` for gpu access.
 
 
 
