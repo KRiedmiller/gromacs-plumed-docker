@@ -7,11 +7,24 @@ Versions of Gromacs and Docker are specified in Dockerfile here.
 
 ## Build
 
-The up to date build command is the first line of Dockerfile, just run
+To build the docker container, set the name you like in the make file and run:
 
-	$(head -1 Dockerfile | sed 's/^#! //')
+	$make
 
-It builds a tagged container ljocha/gromacs:GROMACS_VERSION-LJOCHA_VERSION
+The container will be tagged like riedmiki/gromacs-plumed-python:GROMACS_VERSION  
+
+To point the wrapper `gmx-docker.sh` to the new image run  
+
+	$make wrapper
+
+And push to a registry with
+
+	$make push
+
+All combined in
+
+	$make all
+
 
 ## Run in Docker
 
@@ -19,31 +32,10 @@ At least Docker version 19 is required to run with GPU support, see https://gith
 
 Typical usage
 
-	docker run --gpus all -u $(id -u) -w /work -v $PWD:/work ljocha/gromacs:GROMACS_VERSION-LJOCHA_VERSION gmx ....
+	docker run --gpus all -u $(id -u) -w /work -v $PWD:/work riedmiki/gromacs-plumed-python:2021 gmx ....
 
 or use gmx_d for double precision (does not support GPU). The current working directory is visible to Gromacs due to the -w and -v options, all GPUs are available.
 Effective UID is preserved with -u. 
-
-
-
-## Run in Singularity
-
-Proven to work with Singularity version 3.7
-
-Set up the environment
-
-	export SINGULARITY_CACHEDIR=$HOME/singularity	# some path to be reused
-	export SINGULARITY_TMPDIR=$SCRATCHDIR/singularity	# few GB required 
-	mkdir -p $SINGULARITY_TMPDIR
-
-Pull and convert the image
-
-	singularity pull docker://ljocha/gromacs:GROMACS_VERSION-LJOCHA_VERSION
-
-Run 
-
-	singularity run --nv --pwd /work -B $PWD:/work gromacs_GROMACS_VERSION-LJOCHA_VERSION.sif gmx ...
-
 
 
 

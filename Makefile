@@ -3,11 +3,12 @@ BASE?=riedmiki/gromacs-plumed-python
 VERSION=2021
 IMAGE=${BASE}:${VERSION}
 
-all: build wrapper push
-
 .PHONY: build
 build:
 	docker build -t ${IMAGE} .
+
+.PHONY: all
+all: build wrapper push
 
 .PHONY: wrapper
 wrapper:
