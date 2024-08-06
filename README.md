@@ -28,6 +28,9 @@ All combined in
 
 	$make all
 
+## GPU usage
+
+If you want to use the GPU, try following this [manual by NVidia](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 
 ## Run in Docker
 
