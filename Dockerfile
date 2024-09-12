@@ -1,4 +1,4 @@
-FROM nvidia/cuda:11.0.3-devel-ubuntu20.04 as builder
+FROM nvidia/cuda:12.3.1-devel-ubuntu22.04 AS builder
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV TZ=Europe/Berlin
@@ -44,8 +44,8 @@ RUN ldconfig
 RUN apt update
 RUN apt install -y python3
 
-ARG GROMACS_VERSION=2021
-ARG GROMACS_MD5=176f7decc09b23d79a495107aaedb426
+ARG GROMACS_VERSION=2023.2
+ARG GROMACS_MD5=fb85104d9cd1f753fde761bcbf842566
 ARG GROMACS_PATCH_VERSION=${GROMACS_VERSION}
 
 RUN curl -o gromacs.tar.gz https://ftp.gromacs.org/gromacs/gromacs-${GROMACS_VERSION}.tar.gz
@@ -65,16 +65,14 @@ RUN ./build-gmx.sh -s gromacs-${GROMACS_VERSION} -j ${JOBS} -a AVX_512 -r
 RUN ./build-gmx.sh -s gromacs-${GROMACS_VERSION} -j ${JOBS} -a AVX_512 -r -d
 
 
-# RUN apt-get install -y python3 python3-pip
-# RUN pip3 install torch --extra-index-url https://download.pytorch.org/whl/cpu
+FROM nvidia/cuda:12.3.1-runtime-ubuntu22.04 
 
-FROM nvidia/cuda:11.0.3-runtime-ubuntu20.04
-
+ENV TZ=Europe/Berlin
 RUN apt update
 RUN apt upgrade -y
 RUN apt install -y mpich
-RUN apt install -y libcufft10 libmpich12 libblas3 libgomp1 
-RUN apt install -y rsync
+RUN apt install -y libcufft10 libmpich12 libblas3 libgomp1
+RUN apt install -y rsync tzdata
 
 # COPY --from=builder /build/libtorch /build/libtorch
 # ENV LD_LIBRARY_PATH=/build/libtorch/lib:$LD_LIBRARY_PATH
@@ -93,37 +91,49 @@ RUN ln -s gmx /usr/local/bin/gmx_d
 RUN ln -s gmx /usr/local/bin/mdrun
 RUN ln -s gmx /usr/local/bin/mdrun_d
 
-RUN apt-get install -y wget build-essential checkinstall  libreadline-gplv2-dev  libncursesw5-dev  libssl-dev  libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+RUN apt-get install -y wget build-essential gdb lcov pkg-config \
+    libbz2-dev libffi-dev libgdbm-dev libgdbm-compat-dev liblzma-dev \
+    libncurses5-dev libreadline6-dev libsqlite3-dev libssl-dev \
+    lzma lzma-dev tk-dev uuid-dev zlib1g-dev libmpdec-dev
 
 RUN cd /usr/src && \
-    wget https://www.python.org/ftp/python/3.10.12/Python-3.10.12.tgz && \
-    tar xzf Python-3.10.12.tgz && \
-    cd Python-3.10.12 && \
+    wget https://www.python.org/ftp/python/3.10.14/Python-3.10.14.tgz && \
+    tar xzf Python-3.10.14.tgz && \
+    cd Python-3.10.14 && \
     ./configure --enable-optimizations && \
     make install
-RUN rm -r /usr/src/Python-3.10.12.tgz
+RUN rm -r /usr/src/Python-3.10.14.tgz
 
 RUN cd /usr/src && \
-    wget https://www.python.org/ftp/python/3.11.4/Python-3.11.4.tgz && \
-    tar xzf Python-3.11.4.tgz && \
-    cd Python-3.11.4 && \
+    wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
+    tar xzf Python-3.11.9.tgz && \
+    cd Python-3.11.9 && \
     ./configure --enable-optimizations && \
     make install
-RUN rm -r /usr/src/Python-3.11.4.tgz
+RUN rm -r /usr/src/Python-3.11.9.tgz
 
 RUN cd /usr/src && \
-    wget https://www.python.org/ftp/python/3.9.17/Python-3.9.17.tgz && \
-    tar xzf Python-3.9.17.tgz && \
-    cd Python-3.9.17 && \
+    wget https://www.python.org/ftp/python/3.9.19/Python-3.9.19.tgz && \
+    tar xzf Python-3.9.19.tgz && \
+    cd Python-3.9.19 && \
     ./configure --enable-optimizations && \
     make install
-RUN rm -r /usr/src/Python-3.9.17.tgz
+RUN rm -r /usr/src/Python-3.9.19.tgz
+
+RUN cd /usr/src && \
+    wget https://www.python.org/ftp/python/3.12.4/Python-3.12.4.tgz && \
+    tar xzf Python-3.12.4.tgz && \
+    cd Python-3.12.4 && \
+    ./configure --enable-optimizations && \
+    make install
+RUN rm -r /usr/src/Python-3.12.4.tgz
 
 RUN mkdir /venv
 RUN cd /venv
 RUN python3.9 -m pip install -U tox pip
 RUN python3.10 -m pip install -U tox pip
 RUN python3.11 -m pip install -U tox pip
+RUN python3.12 -m pip install -U tox pip
 
 RUN apt install -y nodejs
 RUN apt install -y zip
